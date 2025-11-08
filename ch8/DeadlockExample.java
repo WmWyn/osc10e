@@ -28,8 +28,13 @@ class A implements Runnable
 	private Lock first, second;
 	
 	public A(Lock first, Lock second) {
-		this.first = first;
-		this.second = second;
+		if (System.identityHashCode(first) < System.identityHashCode(second)) {
+			this.first = first;
+			this.second = second;
+		} else {
+			this.first = second;
+			this.second = first;
+		}
 	}
 	
 	public void run() {
@@ -62,8 +67,13 @@ class B implements Runnable
 	
 	
 	public B(Lock first, Lock second) {
-		this.first = first;
-		this.second = second;
+		if (System.identityHashCode(second) < System.identityHashCode(first)) {
+			this.second = second;
+			this.first = first;
+		} else {
+			this.first = second;
+			this.second = first;
+		}
 	}
 	
 	public void run() {

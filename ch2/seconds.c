@@ -15,16 +15,20 @@
 #include <linux/kernel.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
+#include <linux/jiffies.h>
 
 #define BUFFER_SIZE 128
 
-#define PROC_NAME "hello"
-#define MESSAGE "Hello World\n"
+#define PROC_NAME "seconds"
+#define MESSAGE "seconds since the kernel module was first loaded: "
 
 /**
  * Function prototypes
  */
 static ssize_t proc_read(struct file *file, char *buf, size_t count, loff_t *pos);
+
+static unsigned long jiffies_start;
+
 /** 
 static struct file_operations proc_ops = {
         .owner = THIS_MODULE,
@@ -48,6 +52,9 @@ static int proc_init(void)
         proc_create(PROC_NAME, 0, NULL, &proc_ops);
 
         printk(KERN_INFO "/proc/%s created\n", PROC_NAME);
+        jiffies_start = jiffies; // Store the initial jiffies value
+        printk(KERN_INFO "Module loaded at jiffies: %lu\n", jiffies_start);
+
 	return 0;
 }
 
@@ -87,11 +94,18 @@ static ssize_t proc_read(struct file *file, char __user *usr_buf, size_t count, 
         }
 
         completed = 1;
-
-        rv = sprintf(buffer, "Hello World\n");
+        
+        unsigned long jiffies_now = jiffies;
+        unsigned long seconds = (jiffies_now - jiffies_start) / HZ;
+        
+        // Format the output string
+        rv = sprintf(buffer, "%s%lu\n", MESSAGE, seconds);
+        // rv = sprintf(buffer, "Hello World\n");
 
         // copies the contents of buffer to userspace usr_buf
-        copy_to_user(usr_buf, buffer, rv);
+        if (copy_to_user(usr_buf, buffer, rv)) {
+                return -EFAULT;
+        };
 
         return rv;
 }

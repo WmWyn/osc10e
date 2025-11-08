@@ -1,13 +1,13 @@
 #include <semaphore.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #define NORTH 0
 #define SOUTH 1
 #define NONE 2
 
 #define MAX_CONTINUOUS_NUM 5
-// 
 
 int south_count, north_count;
 int waiting_count_south, waiting_count_north;

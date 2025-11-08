@@ -4,3 +4,5 @@ a.out
 *.cmd
 
 .vscode/*
+*.o
+*.ko
